@@ -224,18 +224,18 @@ void AEnemyBase::Die()
 		EnemyAbilitySystemComponent->AddLooseGameplayTag(DeadTag);
 	}
 	
-	if(DeathMontage)
-	{
-		PlayAnimMontage(DeathMontage);
+	//if(DeathMontage)
+	//{
+		//PlayAnimMontage(DeathMontage);
 		
 		//GEngine->AddOnScreenDebugMessage(-1,2,FColor::Red,TEXT("Entered DeathMontage"));
 		//TODO need proper montage, for now character just disappear, Finish dying should be called somewhere else, it works for now tho
-		GetWorldTimerManager().SetTimer(DelayEnemyRemovalTimer,this,&AEnemyBase::FinishDying,DeathMontage->GetPlayLength());
-	}
-	else
-	{
-		FinishDying();
-	}
+		GetWorldTimerManager().SetTimer(DelayEnemyRemovalTimer,this,&AEnemyBase::FinishDying,1.4);
+	//}
+	//else
+	//{
+		//FinishDying();
+	//}
 }
 
 void AEnemyBase::FinishDying()

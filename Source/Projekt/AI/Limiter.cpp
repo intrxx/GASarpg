@@ -9,6 +9,10 @@
 #include "Projekt/UI/HealthBarWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/WidgetComponent.h"
+#include "Components/TimelineComponent.h"
+#include "Curves/CurveFloat.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInstance.h"
 
 ALimiter::ALimiter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -21,6 +25,8 @@ ALimiter::ALimiter(const FObjectInitializer& ObjectInitializer)
 
 	AttributeSetRef = CreateDefaultSubobject<UGASAttributeSet>(TEXT("AtributeSetBase"));
 
+	DissolveTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComp"));
+	
 	EnemyAttributeSetBase = AttributeSetRef;
 }
 
@@ -61,6 +67,51 @@ void ALimiter::HealthChanged(const FOnAttributeChangeData& Data)
 
 	if (!IsAlive())
 	{
+		// Start Dissolve Effect
+		CreateDeathDynamicMaterialInstances();
+		StartDissolve();
+		
 		Die();
+	}
+}
+
+void ALimiter::UpdateDissolveMaterial(float DissolveValue)
+{
+	if(DissolveDynamicMaterialInstance_Body && DissolveDynamicMaterialInstance_Head)
+	{
+		DissolveDynamicMaterialInstance_Body->SetScalarParameterValue(TEXT("DissolveValue"), DissolveValue);
+		DissolveDynamicMaterialInstance_Head->SetScalarParameterValue(TEXT("DissolveValue"), DissolveValue);
+		UE_LOG(LogTemp, Warning, TEXT("Updating %f"), DissolveValue);
+	}
+}
+
+void ALimiter::CreateDeathDynamicMaterialInstances()
+{
+	UE_LOG(LogTemp, Warning, TEXT("CreateDeathDynamicMaterialInstances"));
+	if(DissolveMaterialInstance_Body && DissolveMaterialInstance_Head)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CreateDeathDynamicMaterialInstances if "));
+		DissolveDynamicMaterialInstance_Body = UMaterialInstanceDynamic::Create(DissolveMaterialInstance_Body, this);
+		DissolveDynamicMaterialInstance_Head = UMaterialInstanceDynamic::Create(DissolveMaterialInstance_Head, this);
+
+		GetMesh()->SetMaterial(0, DissolveDynamicMaterialInstance_Body);
+		GetMesh()->SetMaterial(1, DissolveDynamicMaterialInstance_Head);
+
+		DissolveDynamicMaterialInstance_Body->SetScalarParameterValue(TEXT("DissolveValue"), -0.55f);
+		DissolveDynamicMaterialInstance_Head->SetScalarParameterValue(TEXT("DissolveValue"), -0.55f);
+		
+		DissolveDynamicMaterialInstance_Body->SetScalarParameterValue(TEXT("Glow"), 250.f);
+		DissolveDynamicMaterialInstance_Head->SetScalarParameterValue(TEXT("Glow"), 250.f);
+	}
+}
+
+void ALimiter::StartDissolve()
+{
+	DissolveTrackDelegate.BindDynamic(this, &ThisClass::UpdateDissolveMaterial);
+	if(DissolveCurve && DissolveTimelineComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StartDissolve if"));
+		DissolveTimelineComp->AddInterpFloat(DissolveCurve, DissolveTrackDelegate);
+		DissolveTimelineComp->Play();
 	}
 }
