@@ -10,7 +10,6 @@
 #include "Components/ProgressBar.h"
 #include "Components/WidgetComponent.h"
 #include "Components/TimelineComponent.h"
-#include "Curves/CurveFloat.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInstance.h"
 
@@ -20,14 +19,12 @@ ALimiter::ALimiter(const FObjectInitializer& ObjectInitializer)
 	AbilitySystemComponentRef = CreateDefaultSubobject<UGASAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponentRef->SetIsReplicated(true);
 	AbilitySystemComponentRef->SetReplicationMode(EGameplayEffectReplicationMode::Full);
-
 	EnemyAbilitySystemComponent = AbilitySystemComponentRef;
 
 	AttributeSetRef = CreateDefaultSubobject<UGASAttributeSet>(TEXT("AtributeSetBase"));
-
-	DissolveTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComp"));
-	
 	EnemyAttributeSetBase = AttributeSetRef;
+	
+	DissolveTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComp"));
 }
 
 void ALimiter::BeginPlay()
@@ -70,7 +67,8 @@ void ALimiter::HealthChanged(const FOnAttributeChangeData& Data)
 		// Start Dissolve Effect
 		CreateDeathDynamicMaterialInstances();
 		StartDissolve();
-		
+
+		HealthWidget->SetVisibility(false);
 		Die();
 	}
 }
@@ -110,7 +108,6 @@ void ALimiter::StartDissolve()
 	DissolveTrackDelegate.BindDynamic(this, &ThisClass::UpdateDissolveMaterial);
 	if(DissolveCurve && DissolveTimelineComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StartDissolve if"));
 		DissolveTimelineComp->AddInterpFloat(DissolveCurve, DissolveTrackDelegate);
 		DissolveTimelineComp->Play();
 	}

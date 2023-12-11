@@ -230,7 +230,7 @@ void AEnemyBase::Die()
 		
 		//GEngine->AddOnScreenDebugMessage(-1,2,FColor::Red,TEXT("Entered DeathMontage"));
 		//TODO need proper montage, for now character just disappear, Finish dying should be called somewhere else, it works for now tho
-		GetWorldTimerManager().SetTimer(DelayEnemyRemovalTimer,this,&AEnemyBase::FinishDying,1.4);
+		GetWorldTimerManager().SetTimer(DelayEnemyRemovalTimer,this,&AEnemyBase::FinishDying,1.7f);
 	//}
 	//else
 	//{

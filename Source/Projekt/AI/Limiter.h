@@ -69,7 +69,7 @@ protected:
 
 protected:
 	virtual void HealthChanged(const FOnAttributeChangeData& Data);
-
+	
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
 	void CreateDeathDynamicMaterialInstances();
